@@ -52,36 +52,72 @@ async function apiCall(path, body){
 }
 
 // ----- 오프라인(로컬) 모드 -----
-function localUsersDB(){
-  try { return JSON.parse(localStorage.getItem("printout_users") || "{}"); }
-  catch { return {}; }
+// localStorage는 브라우저 devtools로 누구나 열람/수정 가능한 저장소이므로 완벽한 보안은
+// 불가능합니다. 대신 아래 두 가지로 "캐주얼한 열람/조작"은 확실히 막습니다:
+//   1) 비밀번호는 평문이 아니라 SHA-256(salt + 비밀번호) 해시로만 저장
+//   2) 저장 데이터 전체를 base64로 감싸고, 무결성 체크섬을 같이 저장해서
+//      값이 조작되면 체크섬이 어긋나 그 저장 데이터를 폐기(무효 처리)
+const STORAGE_KEY = "printout_save_v2";
+const SIGN_SALT = "printout-9f2c-static-pepper"; // 코드에 포함되는 값이라 완전한 비밀은 아니지만, 무단 편집을 자동 감지하는 용도로는 충분합니다.
+
+async function sha256Hex(str){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
-function saveLocalUsersDB(db){
-  localStorage.setItem("printout_users", JSON.stringify(db));
+function toB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function fromB64(str){ return decodeURIComponent(escape(atob(str))); }
+
+async function loadDB(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return {};
+  try {
+    const { data, checksum } = JSON.parse(raw);
+    const expected = await sha256Hex(data + SIGN_SALT);
+    if (expected !== checksum) {
+      console.warn("[PRINTOUT] 저장 데이터의 무결성 검증에 실패했습니다 (변조되었거나 손상됨). 무시합니다.");
+      return {};
+    }
+    return JSON.parse(fromB64(data));
+  } catch {
+    return {};
+  }
 }
-function offlineAuth(id, pw, isSignup){
-  const db = localUsersDB();
+async function saveDB(db){
+  const data = toB64(JSON.stringify(db));
+  const checksum = await sha256Hex(data + SIGN_SALT);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ data, checksum }));
+}
+function randomSaltHex(){
+  return Array.from(crypto.getRandomValues(new Uint8Array(16))).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function offlineAuth(id, pw, isSignup){
+  const db = await loadDB();
   if (isSignup) {
     if (db[id]) throw new Error("이미 존재하는 아이디입니다.");
     if (id.length < 2 || pw.length < 4) throw new Error("아이디는 2자 이상, 비밀번호는 4자 이상이어야 합니다.");
-    db[id] = { pw, gender: null, bestFloor: 1 };
-    saveLocalUsersDB(db);
+    const salt = randomSaltHex();
+    const hash = await sha256Hex(salt + pw);
+    db[id] = { salt, hash, gender: null, bestFloor: 1 };
+    await saveDB(db);
     return { id, gender: null, bestFloor: 1 };
   } else {
     const u = db[id];
-    if (!u || u.pw !== pw) throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
+    if (!u) throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
+    const hash = await sha256Hex(u.salt + pw);
+    if (hash !== u.hash) throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
     return { id, gender: u.gender, bestFloor: u.bestFloor };
   }
 }
-function offlineSaveGender(id, gender){
-  const db = localUsersDB();
-  if (db[id]) { db[id].gender = gender; saveLocalUsersDB(db); }
+async function offlineSaveGender(id, gender){
+  const db = await loadDB();
+  if (db[id]) { db[id].gender = gender; await saveDB(db); }
 }
-export function offlineSaveBestFloor(id, floor){
-  const db = localUsersDB();
+export async function offlineSaveBestFloor(id, floor){
+  const db = await loadDB();
   if (db[id] && floor > (db[id].bestFloor || 1)) {
     db[id].bestFloor = floor;
-    saveLocalUsersDB(db);
+    await saveDB(db);
   }
 }
 
@@ -115,7 +151,7 @@ async function handleSubmit(){
     } catch (netErr) {
       // 서버 실패 -> 오프라인 폴백
       offline = true;
-      userData = offlineAuth(id, pw, mode === "signup");
+      userData = await offlineAuth(id, pw, mode === "signup");
     }
 
     PrintoutUser.id = userData.id;
@@ -146,7 +182,7 @@ document.querySelectorAll(".gender-card").forEach((btn) => {
     els.screenGender.classList.add("hidden");
 
     if (PrintoutUser.offline) {
-      offlineSaveGender(PrintoutUser.id, gender);
+      await offlineSaveGender(PrintoutUser.id, gender);
     } else {
       try {
         await apiCall("/api/set-gender", { id: PrintoutUser.id, gender });
