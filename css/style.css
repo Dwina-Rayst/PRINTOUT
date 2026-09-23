@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Nosifer&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+:root{
+  --bg:#050506;
+  --accent:#8b0000;
+  --accent2:#5ecbff;
+  --text:#d8d8d8;
+  --panel:#0d0d10;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{
+  width:100%; height:100%; overflow:hidden;
+  background:var(--bg); color:var(--text);
+  font-family:'Noto Sans KR', sans-serif;
+}
+#game-canvas{position:fixed; inset:0; width:100%; height:100%; display:block; z-index:0;}
+
+.hidden{display:none !important;}
+
+.screen{
+  position:fixed; inset:0; z-index:10;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:radial-gradient(ellipse at center, #14100f 0%, #030303 80%);
+  text-align:center; padding:20px; gap:14px;
+}
+.overlay-screen{ background:rgba(0,0,0,0.75); }
+
+.noise-overlay{
+  position:absolute; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.title-glitch{
+  font-family:'Nosifer', 'Noto Sans KR', sans-serif;
+  font-size:clamp(36px,8vw,72px);
+  color:#c2c2c2;
+  text-shadow:2px 0 var(--accent), -2px 0 var(--accent2), 0 0 30px rgba(139,0,0,.6);
+  letter-spacing:4px;
+  animation:flicker 4s infinite;
+}
+.title-glitch.red{color:#e11; text-shadow:2px 0 #500, -2px 0 #900;}
+.title-glow{font-size:clamp(28px,6vw,48px); color:var(--accent2); text-shadow:0 0 20px var(--accent2);}
+@keyframes flicker{
+  0%,19%,21%,23%,80%,100%{opacity:1;}
+  20%,22%,79%{opacity:.55;}
+}
+.subtitle{color:#888; font-size:14px; letter-spacing:2px;}
+
+.auth-box, .inventory-box{
+  background:var(--panel); border:1px solid #2a2a2a; padding:24px; width:320px;
+  display:flex; flex-direction:column; gap:10px; box-shadow:0 0 40px rgba(0,0,0,.8);
+}
+.tabs, .inv-tabs{display:flex; gap:4px; margin-bottom:6px;}
+.tab{
+  flex:1; background:#151515; border:1px solid #2a2a2a; color:#888; padding:8px; cursor:pointer;
+}
+.tab.active{background:#1e1414; color:#fff; border-color:var(--accent);}
+input{
+  background:#111; border:1px solid #333; color:#eee; padding:10px; font-size:14px; outline:none;
+}
+input:focus{border-color:var(--accent2);}
+.btn-primary{
+  background:linear-gradient(180deg,#3a0a0a,#1a0505); color:#f0e0e0; border:1px solid var(--accent);
+  padding:12px; cursor:pointer; font-size:15px; letter-spacing:1px; transition:.15s;
+}
+.btn-primary:hover{background:var(--accent); color:#fff;}
+.btn-secondary{
+  background:#151515; border:1px solid #333; color:#bbb; padding:9px; cursor:pointer; margin-top:6px;
+}
+.error-text{color:#f55; font-size:12px; min-height:14px;}
+.hint{color:#666; font-size:11px;}
+
+.gender-select{display:flex; gap:20px;}
+.gender-card{
+  width:130px; height:150px; background:#0d0d0d; border:1px solid #333; color:#ccc; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  font-size:16px; transition:.15s;
+}
+.gender-card:hover{border-color:var(--accent2); color:#fff; box-shadow:0 0 20px rgba(94,203,255,.3);}
+.gender-icon{font-size:40px;}
+
+/* cutscene */
+#screen-cutscene{background:#000; justify-content:flex-end; padding-bottom:60px;}
+#cutscene-canvas-wrap{position:absolute; inset:0;}
+.cutscene-text-box{
+  position:relative; z-index:2; background:rgba(0,0,0,.7); border-top:1px solid #333;
+  width:80%; max-width:700px; padding:18px 24px; font-size:16px; line-height:1.6; min-height:60px;
+}
+.btn-skip{
+  position:absolute; top:20px; right:20px; z-index:3; background:rgba(20,20,20,.7); color:#aaa;
+  border:1px solid #444; padding:8px 14px; cursor:pointer;
+}
+
+/* HUD */
+#hud{position:fixed; inset:0; z-index:5; pointer-events:none; font-family:'Noto Sans KR',sans-serif;}
+.hud-top-left{position:absolute; top:16px; left:16px; display:flex; flex-direction:column; gap:6px; width:260px;}
+.floor-counter{font-size:14px; letter-spacing:2px; color:#ccc; text-shadow:0 0 6px #000;}
+.stat-bar{position:relative; width:100%; height:18px; background:#1a1a1a; border:1px solid #333;}
+.stat-fill{height:100%; background:linear-gradient(90deg,#8b0000,#c62828); width:80%; transition:width .25s;}
+.boss-bar .stat-fill{background:linear-gradient(90deg,#5e0d99,#a13ee0);}
+.stat-label{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; text-shadow:0 0 3px #000;}
+.stat-line{font-size:11px; color:#999;}
+.grace-timer{font-size:12px; color:#ffcf6b; text-shadow:0 0 6px #000; letter-spacing:1px;}
+.hud-top-right{position:absolute; top:16px; right:16px; pointer-events:all;}
+.icon-btn{background:rgba(15,15,15,.7); border:1px solid #333; color:#ddd; font-size:20px; padding:8px 12px; cursor:pointer;}
+
+.boss-hud{position:absolute; top:16px; left:50%; transform:translateX(-50%); width:min(500px,70vw); text-align:center;}
+.boss-name{font-size:14px; letter-spacing:3px; color:#e0c; margin-bottom:4px; text-shadow:0 0 8px #a13ee0;}
+
+#damage-flash{position:absolute; inset:0; background:rgba(139,0,0,0); transition:background .1s;}
+#crosshair{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#ddd; font-size:14px; opacity:.5;}
+#interact-prompt{
+  position:absolute; bottom:20%; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.6);
+  padding:8px 14px; font-size:13px; border:1px solid #333;
+}
+#toast-container{position:absolute; bottom:60px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; gap:6px; align-items:center;}
+.toast{background:rgba(10,10,10,.85); border:1px solid #444; padding:8px 16px; font-size:13px; animation:toastIn .3s;}
+@keyframes toastIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+/* inventory */
+.inventory-box{width:380px; text-align:left;}
+.inv-panel{min-height:140px; padding:8px 0; font-size:13px; line-height:1.7;}
+.inv-desc{color:#ddd;}
+#phone-messages{display:flex; flex-direction:column; gap:10px; max-height:220px; overflow-y:auto;}
+.phone-msg{background:#111; border:1px solid #2a2a2a; padding:10px; font-size:12px;}
+.phone-msg .sender{color:#5ecbff; font-size:10px; word-break:break-all; margin-bottom:4px; user-select:none;}
+.phone-msg .body{color:#eee;}
+
+#screen-gameover, #screen-victory{gap:20px;}
