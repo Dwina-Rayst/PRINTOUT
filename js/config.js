@@ -29,7 +29,7 @@ export const CONFIG = {
     poisonPercent: 0.2, // 공격력의 20%
     poisonDuration: 3,  // 초
     poisonTick: 1,      // 1초마다
-    speed: 6.2,         // 플레이어보다 빠름
+    speed: 1,
     spawnCountFirstFloor: 15,
     legPairs: 15,
   },
