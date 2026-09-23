@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { CONFIG } from "./config.js";
-import { PrintoutUser, offlineSaveBestFloor, API_BASE } from "./auth.js";
+import { PrintoutUser, API_BASE } from "./auth.js";
 
 /* ============================================================
    전역 상태
@@ -690,14 +690,10 @@ function renderPhone(){
 }
 
 /* ============================================================
-   최고 층 기록 저장 (온라인이면 Turso로, 오프라인이면 localStorage로)
+   최고 층 기록 저장 (Turso 서버로)
 ============================================================ */
 function saveBestFloor(floor){
   if (!PrintoutUser.id) return;
-  if (PrintoutUser.offline) {
-    offlineSaveBestFloor(PrintoutUser.id, floor);
-    return;
-  }
   fetch(`${API_BASE}/api/best-floor`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
