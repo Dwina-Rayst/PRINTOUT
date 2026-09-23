@@ -30,7 +30,7 @@ export const CONFIG = {
     poisonDuration: 3,  // 초
     poisonTick: 1,      // 1초마다
     speed: 1,
-    spawnCountFirstFloor: 15,
+    spawnCountFirstFloor: 1,
     legPairs: 15,
   },
 
