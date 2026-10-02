@@ -1,7 +1,7 @@
 // ============================================================
 // PRINTOUT - Backend Server
 // Express + Turso (libSQL) 를 사용한 회원가입/로그인 API
-// Render 등 Node 호스팅에 그대로 배포 가능합니다.
+// ※ users 테이블은 Turso CLI로 미리 생성해둔 상태여야 합니다 (schema.sql 참고)
 // ============================================================
 import express from "express";
 import cors from "cors";
@@ -14,22 +14,9 @@ app.use(cors());
 app.use(express.json());
 
 const db = createClient({
-  url: process.env.TURSO_DATABASE_URL,       // 예: libsql://your-db.turso.io
+  url: process.env.TURSO_DATABASE_URL,
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
-
-async function init(){
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS users (
-      id TEXT PRIMARY KEY,
-      password_hash TEXT NOT NULL,
-      gender TEXT,
-      best_floor INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-}
-init().catch((e) => console.error("DB init 실패:", e));
 
 function validId(id){ return typeof id === "string" && id.length >= 2 && id.length <= 16; }
 function validPw(pw){ return typeof pw === "string" && pw.length >= 4 && pw.length <= 64; }
