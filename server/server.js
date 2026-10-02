@@ -105,4 +105,20 @@ app.post("/api/set-gender", async (req, res) => {
 });
 
 app.post("/api/best-floor", async (req, res) => {
-  const { id, floor } =
+  const { id, floor } = req.body || {};
+  if (!validId(id) || typeof floor !== "number") {
+    return res.status(400).json({ message: "입력값이 올바르지 않습니다." });
+  }
+  try {
+    await tursoExec("UPDATE users SET best_floor = MAX(best_floor, ?) WHERE id = ?", [floor, id]);
+    return res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "[DEBUG] " + (e.message || String(e)) });
+  }
+});
+
+app.get("/", (_req, res) => res.send("PRINTOUT API is running."));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`PRINTOUT server listening on port ${PORT}`));
