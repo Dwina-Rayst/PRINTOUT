@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { CONFIG } from "./config.js";
 import { PrintoutUser, API_BASE } from "./auth.js";
 
@@ -924,12 +926,16 @@ function startCutscene(){
   const skipBtn = document.getElementById("cutscene-skip");
 
   const lines = [
-    "...뭐야, 저게.",
-    "3D 프린터 헤드를 몸통 삼은 거대한 지네가 당신을 쫓아옵니다.",
+    "고등학교 3학년 학생인 당신은 오늘도 언제나처럼 학원을 향해 걸어갑니다.",
+    "근처 공사장에서 당신의 이름이 들립니다.",
+    "누군가 부른다고 생각해 고개를 돌렸지만, 아무도 없습니다.",
+    "다시 학원으로 걸어가던 중, 신발끈이 풀려 다시 묶으려던 당신은...",
+    "3D 펜을 닮은 듯한 거대한 지네가 신발 위에 있는 것을 보고 기겁합니다.",
     "정신없이 도망치다, 낡은 공장 건물 안으로 뛰어듭니다.",
-    "쾅! — 뒤에서 철문이 저절로 닫힙니다.",
-    "숨을 곳을 찾았다고 생각한 순간, 당신은 깨닫습니다.",
-    "이곳은... 갇힌 것입니다.",
+    "숨을 곳을 찾았다고 생각한 순간,",
+    "쾅!",
+    "뒤에서 철문이 저절로 닫힙니다.",
+    "당신은 숨은 것이 아닌, 갇힌 것입니다.",
   ];
   let i = 0;
   let finished = false;
