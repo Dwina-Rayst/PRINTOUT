@@ -1,7 +1,5 @@
 // ============================================================
-// PRINTOUT - Backend Server
-// Express + Turso (libSQL) 를 사용한 회원가입/로그인 API
-// ※ users 테이블은 Turso CLI로 미리 생성해둔 상태여야 합니다 (schema.sql 참고)
+// PRINTOUT - Backend Server (디버그 모드: 에러 메시지를 응답에 노출)
 // ============================================================
 import express from "express";
 import cors from "cors";
@@ -39,7 +37,7 @@ app.post("/api/signup", async (req, res) => {
     return res.json({ id, gender: null, bestFloor: 1 });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ message: "서버 오류가 발생했습니다." });
+    return res.status(500).json({ message: "[DEBUG] " + (e.message || String(e)) });
   }
 });
 
@@ -57,7 +55,7 @@ app.post("/api/login", async (req, res) => {
     return res.json({ id: user.id, gender: user.gender, bestFloor: user.best_floor });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ message: "서버 오류가 발생했습니다." });
+    return res.status(500).json({ message: "[DEBUG] " + (e.message || String(e)) });
   }
 });
 
@@ -71,7 +69,7 @@ app.post("/api/set-gender", async (req, res) => {
     return res.json({ ok: true });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ message: "서버 오류가 발생했습니다." });
+    return res.status(500).json({ message: "[DEBUG] " + (e.message || String(e)) });
   }
 });
 
@@ -88,7 +86,7 @@ app.post("/api/best-floor", async (req, res) => {
     return res.json({ ok: true });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ message: "서버 오류가 발생했습니다." });
+    return res.status(500).json({ message: "[DEBUG] " + (e.message || String(e)) });
   }
 });
 
